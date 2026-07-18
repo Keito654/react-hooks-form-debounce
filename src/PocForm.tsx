@@ -23,9 +23,10 @@ export default function PocForm() {
           name="name"
           control={control}
           rules={{ required: '名前は必須です' }}
-          render={({ field, fieldState }) => (
+          render={({ field: { ref, ...rest }, fieldState }) => (
             <TextField
-              {...field}
+              {...rest}
+              inputRef={ref}
               label="名前"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
@@ -36,9 +37,10 @@ export default function PocForm() {
           name="email"
           control={control}
           rules={{ required: 'メールアドレスは必須です' }}
-          render={({ field, fieldState }) => (
+          render={({ field: { ref, ...rest }, fieldState }) => (
             <TextField
-              {...field}
+              {...rest}
+              inputRef={ref}
               label="メールアドレス"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
@@ -49,9 +51,10 @@ export default function PocForm() {
           name="comment"
           control={control}
           rules={{ required: 'コメントは必須です' }}
-          render={({ field, fieldState }) => (
+          render={({ field: { ref, ...rest }, fieldState }) => (
             <TextField
-              {...field}
+              {...rest}
+              inputRef={ref}
               label="コメント"
               multiline
               minRows={3}
