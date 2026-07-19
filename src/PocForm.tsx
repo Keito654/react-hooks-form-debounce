@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
-import { Box, Button, Stack, TextField } from '@mui/material'
+import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { useFaqSuggestionTrigger } from './useFaqSuggestionTrigger'
 
 export type FormValues = {
   trigger: string
@@ -8,13 +9,35 @@ export type FormValues = {
   category: string
 }
 
+type FireLogEntry = {
+  id: number
+  firedAt: string
+  values: FormValues
+}
+
 export default function PocForm() {
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, handleSubmit, subscribe } = useForm<FormValues>({
     defaultValues: { trigger: '', question: '', category: '' },
   })
   const [submitted, setSubmitted] = useState<FormValues | null>(null)
+  const [fireLog, setFireLog] = useState<FireLogEntry[]>([])
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => setSubmitted(data)
+  // 将来はここが FAQ 提案 AI の API コールに置き換わる
+  const { cancel } = useFaqSuggestionTrigger(subscribe, (values) => {
+    setFireLog((prev) => [
+      {
+        id: prev.length + 1,
+        firedAt: new Date().toLocaleTimeString('ja-JP'),
+        values,
+      },
+      ...prev,
+    ])
+  })
+
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    cancel()
+    setSubmitted(data)
+  }
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -67,6 +90,20 @@ export default function PocForm() {
           送信
         </Button>
         {submitted && <pre>{JSON.stringify(submitted, null, 2)}</pre>}
+        {fireLog.length > 0 && (
+          <Box>
+            <Typography variant="subtitle2">
+              デバウンス発火履歴(新しい順)
+            </Typography>
+            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+              {fireLog.map((entry) => (
+                <li key={entry.id}>
+                  {entry.firedAt} — {JSON.stringify(entry.values)}
+                </li>
+              ))}
+            </Box>
+          </Box>
+        )}
       </Stack>
     </Box>
   )
