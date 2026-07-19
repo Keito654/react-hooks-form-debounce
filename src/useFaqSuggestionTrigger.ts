@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { UseFormSubscribe } from 'react-hook-form'
-import { useDebouncedCallback } from 'use-debounce'
+import { useDebouncedCallback } from './useDebouncedCallback'
 import type { FormValues } from './PocForm'
 
 export const DEBOUNCE_WAIT_MS = 2000
