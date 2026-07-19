@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 import { Box, Button, Stack, TextField } from '@mui/material'
 
-type FormValues = {
+export type FormValues = {
   trigger: string
   question: string
   category: string
