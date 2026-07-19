@@ -1,11 +1,12 @@
+import Container from '@mui/material/Container';
 import PocForm from './PocForm'
 
 function App() {
   return (
-    <main style={{ padding: '2rem' }}>
+    <Container>
       <h1>MUI × react-hook-form × debounce PoC</h1>
       <PocForm />
-    </main>
+    </Container>
   )
 }
 
