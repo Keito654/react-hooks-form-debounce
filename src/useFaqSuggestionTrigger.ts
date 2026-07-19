@@ -22,6 +22,7 @@ export function useFaqSuggestionTrigger(
 
   useEffect(() => {
     const unsubscribe = subscribe({
+      name: ['trigger', 'question', 'category'],
       formState: { values: true },
       callback: ({ values }) => {
         if (isAllFilled(values)) {

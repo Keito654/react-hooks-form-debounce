@@ -15,6 +15,9 @@ type FireLogEntry = {
   values: FormValues
 }
 
+// 履歴の無制限な増加によるメモリ・描画コストの単調増加を防ぐ
+const MAX_FIRE_LOG_ENTRIES = 20
+
 export default function PocForm() {
   const { control, handleSubmit, subscribe } = useForm<FormValues>({
     defaultValues: { trigger: '', question: '', category: '' },
@@ -26,11 +29,11 @@ export default function PocForm() {
   const { cancel } = useFaqSuggestionTrigger(subscribe, (values) => {
     setFireLog((prev) => [
       {
-        id: prev.length + 1,
+        id: (prev[0]?.id ?? 0) + 1,
         firedAt: new Date().toLocaleTimeString('ja-JP'),
         values,
       },
-      ...prev,
+      ...prev.slice(0, MAX_FIRE_LOG_ENTRIES - 1),
     ])
   })
 

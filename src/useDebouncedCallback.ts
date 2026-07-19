@@ -9,6 +9,7 @@ export type DebouncedCallback<Args extends unknown[]> = {
  * use-debounce の useDebouncedCallback の自前実装(本プロジェクトで使う範囲のみ)。
  * - 呼び出しごとにタイマーをリセットし、静止 waitMs 後に最後の引数で callback を実行する
  * - cancel() で保留中の発火を破棄する
+ * - アンマウント時と waitMs 変更時は保留中の発火を自動で破棄する
  * - 返り値はレンダー間で参照が安定し、発火時は常に最新の callback を呼ぶ
  */
 export function useDebouncedCallback<Args extends unknown[]>(
@@ -21,6 +22,13 @@ export function useDebouncedCallback<Args extends unknown[]>(
   })
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timerRef.current)
+      timerRef.current = undefined
+    }
+  }, [waitMs])
 
   return useMemo(() => {
     const debounced = (...args: Args) => {
