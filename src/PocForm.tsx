@@ -3,14 +3,14 @@ import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 import { Box, Button, Stack, TextField } from '@mui/material'
 
 type FormValues = {
-  name: string
-  email: string
-  comment: string
+  trigger: string
+  question: string
+  category: string
 }
 
 export default function PocForm() {
   const { control, handleSubmit } = useForm<FormValues>({
-    defaultValues: { name: '', email: '', comment: '' },
+    defaultValues: { trigger: '', question: '', category: '' },
   })
   const [submitted, setSubmitted] = useState<FormValues | null>(null)
 
@@ -20,44 +20,44 @@ export default function PocForm() {
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
       <Stack spacing={2} sx={{ maxWidth: 480 }}>
         <Controller
-          name="name"
+          name="trigger"
           control={control}
-          rules={{ required: '名前は必須です' }}
+          rules={{ required: '質問のきっかけは必須です' }}
           render={({ field: { ref, ...rest }, fieldState }) => (
             <TextField
               {...rest}
               inputRef={ref}
-              label="名前"
+              label="質問のきっかけ"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
             />
           )}
         />
         <Controller
-          name="email"
+          name="question"
           control={control}
-          rules={{ required: 'メールアドレスは必須です' }}
+          rules={{ required: '質問内容は必須です' }}
           render={({ field: { ref, ...rest }, fieldState }) => (
             <TextField
               {...rest}
               inputRef={ref}
-              label="メールアドレス"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
-        <Controller
-          name="comment"
-          control={control}
-          rules={{ required: 'コメントは必須です' }}
-          render={({ field: { ref, ...rest }, fieldState }) => (
-            <TextField
-              {...rest}
-              inputRef={ref}
-              label="コメント"
+              label="質問内容"
               multiline
               minRows={3}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+            />
+          )}
+        />
+        <Controller
+          name="category"
+          control={control}
+          rules={{ required: '質問分野や種別は必須です' }}
+          render={({ field: { ref, ...rest }, fieldState }) => (
+            <TextField
+              {...rest}
+              inputRef={ref}
+              label="質問分野や種別"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
             />
