@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Skeleton, Stack, TextField, Typography } from '@mui/material'
 import { useFaqSuggestionTrigger } from './useFaqSuggestionTrigger'
+import { useFaqSuggestions } from './useFaqSuggestions'
 
 export type FormValues = {
   trigger: string
@@ -9,37 +10,25 @@ export type FormValues = {
   category: string
 }
 
-type FireLogEntry = {
-  id: number
-  firedAt: string
-  values: FormValues
-}
-
-// 履歴の無制限な増加によるメモリ・描画コストの単調増加を防ぐ
-const MAX_FIRE_LOG_ENTRIES = 20
-
 export default function PocForm() {
   const { control, handleSubmit, subscribe } = useForm<FormValues>({
     defaultValues: { trigger: '', question: '', category: '' },
   })
   const [submitted, setSubmitted] = useState<FormValues | null>(null)
-  const [fireLog, setFireLog] = useState<FireLogEntry[]>([])
+  const [faqParams, setFaqParams] = useState<FormValues | null>(null)
 
-  // 将来はここが FAQ 提案 AI の API コールに置き換わる
+  // デモAPI呼び出し
+  const { data, isLoading, isError, error } = useFaqSuggestions(faqParams)
+
+  // デバウンスして発火する
   const { cancel } = useFaqSuggestionTrigger(subscribe, (values) => {
-    setFireLog((prev) => [
-      {
-        id: (prev[0]?.id ?? 0) + 1,
-        firedAt: new Date().toLocaleTimeString('ja-JP'),
-        values,
-      },
-      ...prev.slice(0, MAX_FIRE_LOG_ENTRIES - 1),
-    ])
+    // stateが変わることで、useFaqSuggestionsの引数が変化しAPIが再Fetchされる
+    setFaqParams(values);
   })
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    cancel()
-    setSubmitted(data)
+    cancel(); // submitされた場合、APIをコールする必要がなくなるためcancel
+    setSubmitted(data);
   }
 
   return (
@@ -92,21 +81,31 @@ export default function PocForm() {
         <Button type="submit" variant="contained">
           送信
         </Button>
-        {submitted && <pre>{JSON.stringify(submitted, null, 2)}</pre>}
-        {fireLog.length > 0 && (
+        {faqParams && (
           <Box>
-            <Typography variant="subtitle2">
-              デバウンス発火履歴(新しい順)
-            </Typography>
-            <Box component="ul" sx={{ pl: 2, m: 0 }}>
-              {fireLog.map((entry) => (
-                <li key={entry.id}>
-                  {entry.firedAt} — {JSON.stringify(entry.values)}
-                </li>
-              ))}
-            </Box>
+            <Typography variant="subtitle2">関連する FAQ 候補</Typography>
+            {isLoading ? (
+              <Stack spacing={0.5}>
+                <Skeleton variant="text" />
+                <Skeleton variant="text" />
+                <Skeleton variant="text" />
+              </Stack>
+            ) : isError ? (
+              <Typography variant="body2" color="error">
+                FAQ の取得に失敗しました: {error.message}
+              </Typography>
+            ) : data?.length === 0 ? (
+              <Typography variant="body2">該当する FAQ はありません</Typography>
+            ) : (
+              <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                {data?.map((faq) => (
+                  <li key={faq.id}>{faq.title}</li>
+                ))}
+              </Box>
+            )}
           </Box>
         )}
+        {submitted && <pre>{JSON.stringify(submitted, null, 2)}</pre>}
       </Stack>
     </Box>
   )
